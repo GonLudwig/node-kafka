@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  broker:
+    hostname: broker
+    container_name: broker
+    image: apache/kafka:3.7.0
+    ports:
+      - 9092:9092
+    environment:
+    networks:
+      - kafkaNetwork
+  node1:
+    image: node:21-alpine
+    ports:
+      - 3000:3000
+    volumes:
+      - ./app:/usr/src/app
+    working_dir: /usr/src/app
+    networks:
+      - kafkaNetwork
+    depends_on:
+      - broker
+    
+networks:
+  kafkaNetwork:
+    driver: bridge
