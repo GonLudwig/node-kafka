@@ -1,22 +1,19 @@
 const { Kafka } = require('kafkajs')
 
 const kafka = new Kafka({
-  clientId: 'my-app',
   brokers: ['broker:9092'],
 })
 
-const producer = kafka.admin()
+const producer = kafka.producer()
 
 const teste = async () => {
-    // await producer.connect()
-    // await producer.send({
-    //   topic: 'test-topic-10',
-    //   messages: [
-    //     {  key: 'key1', value: 'Hello KafkaJS user!' },
-    //   ],
-    // })
-    
-    // await producer.disconnect()
+    await producer.connect()
+    await producer.send({
+      topic: 'test-topic',
+      messages: [
+        { value: 'Hello KafkaJS user!' },
+      ],
+})
     console.log(await admin.listTopics())
 }
 
