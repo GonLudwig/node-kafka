@@ -1,7 +1,7 @@
 const { Kafka } = require('kafkajs')
 
 const kafka = new Kafka({
-  brokers: ['broker:9092'],
+  brokers: ['broker:19092'],
 })
 
 const producer = kafka.producer()
@@ -9,12 +9,13 @@ const producer = kafka.producer()
 const teste = async () => {
     await producer.connect()
     await producer.send({
-      topic: 'test-topic',
-      messages: [
-        { value: 'Hello KafkaJS user!' },
-      ],
-})
-    console.log(await admin.listTopics())
+        topic: 'LOJA_NOVO_PEDIDO',
+        messages: [
+            { value: 'Hello KafkaJS user!' },
+        ],
+    })
+
+    await producer.disconnect()
 }
 
 teste()
