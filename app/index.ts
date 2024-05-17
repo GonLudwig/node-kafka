@@ -1,6 +1,7 @@
-const { Kafka } = require('kafkajs')
+import { Kafka } from "kafkajs"
 
-const kafka = new Kafka({
+
+const kafka: Kafka = new Kafka({
   brokers: ['broker:19092'],
 })
 
