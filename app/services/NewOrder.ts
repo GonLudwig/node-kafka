@@ -7,12 +7,11 @@ class NewOrder {
 
     private readonly producer: Producer = this.kafka.producer();
 
-    async produce(messages: Message[]) {
+    async produce(topic: string, messages: Message[]) {
         const record: ProducerRecord = {
-            topic: 'ECOMMERCE_NEW_ORDER',
+            topic,
             messages: messages
         };
-
         
         try {
             await this.producer.connect();
@@ -30,6 +29,12 @@ class NewOrder {
 }
 
 const order = new NewOrder();
-order.produce([
-    { value: 'Hello KafkaJS user!' },
-]);
+order.produce(
+    'ECOMMERCE_NEW_ORDER',
+    [{ value: 'Hello KafkaJS user!' }]
+);
+
+order.produce(
+    'ECOMMERCE_SEND_EMAIL',
+    [{ value: 'Thank you for your order!' }]
+);

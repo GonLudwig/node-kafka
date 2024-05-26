@@ -1,12 +1,12 @@
 import { Consumer, Kafka} from "kafkajs";
 
-class FraudDetector {
+class EmailService {
     private readonly kafka: Kafka = new Kafka({
         brokers: ['broker:19092']
     });
 
     private readonly consumer: Consumer = this.kafka.consumer({
-        groupId: 'FraudDetector',
+        groupId: 'EmailService',
         // partitionAssigners: <Array>,
         // sessionTimeout: <Number>,
         // rebalanceTimeout: <Number>,
@@ -25,9 +25,9 @@ class FraudDetector {
     async poll() {
         try {
             await this.consumer.connect();
-            await this.consumer.subscribe({ topics: ['ECOMMERCE_NEW_ORDER'], fromBeginning: true});
-            await this.consumer.run({
-                autoCommitInterval: 5000,
+            await this.consumer.subscribe({ topics: ['ECOMMERCE_SEND_EMAIL'], fromBeginning: true});
+            this.consumer.run({
+                autoCommitInterval: 1000,
                 eachMessage: async ({ topic, partition, message }) => {
                     console.log({
                         topic,
@@ -46,5 +46,5 @@ class FraudDetector {
     }
 }
 
-const order = new FraudDetector();
+const order = new EmailService();
 order.poll();
