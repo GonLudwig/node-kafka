@@ -1,32 +1,26 @@
-import { Consumer, Kafka} from "kafkajs";
+import KafkaConsumer from "./kafka/KafkaConsumer";
 
-class EmailService {
-    private readonly kafka: Kafka = new Kafka({
-        brokers: ['broker:19092']
-    });
+export default class EmailService {
 
-    private readonly consumer: Consumer = this.kafka.consumer({
-        groupId: 'EmailService',
-        // partitionAssigners: <Array>,
-        // sessionTimeout: <Number>,
-        // rebalanceTimeout: <Number>,
-        // heartbeatInterval: <Number>,
-        // metadataMaxAge: <Number>,
-        // allowAutoTopicCreation: <Boolean>,
-        // maxBytesPerPartition: <Number>,
-        // minBytes: <Number>,
-        // maxBytes: <Number>,
-        // maxWaitTimeInMs: <Number>,
-        // retry: <Object>,
-        // maxInFlightRequests: <Number>,
-        // rackId: <String>
-    });
+    private readonly consumer: KafkaConsumer;
 
-    async poll() {
-        try {
-            await this.consumer.connect();
-            await this.consumer.subscribe({ topics: ['ECOMMERCE_SEND_EMAIL'], fromBeginning: true});
-            this.consumer.run({
+    constructor()
+    {
+        this.consumer = new KafkaConsumer(
+            {
+                brokers: ['broker:19092']
+            },
+            {
+                groupId: 'EmailService'
+            }
+        )
+    }
+
+    private async poll(): Promise<void>
+    {
+        this.consumer.poll(
+            { topics: ['ECOMMERCE_SEND_EMAIL'], fromBeginning: true},
+            {
                 autoCommitInterval: 1000,
                 eachMessage: async ({ topic, partition, message }) => {
                     console.log({
@@ -37,14 +31,7 @@ class EmailService {
                         headers: message.headers,
                     })
                 },
-            })
-        } catch (error) {
-            if (error instanceof Error) {
-                console.log('ERROR' + error.message)
             }
-        }
+        )
     }
 }
-
-const order = new EmailService();
-order.poll();

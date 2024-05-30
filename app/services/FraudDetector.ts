@@ -1,32 +1,34 @@
-import { Consumer, Kafka} from "kafkajs";
+import KafkaConsumer from "./kafka/KafkaConsumer";
 
-class FraudDetector {
-    private readonly kafka: Kafka = new Kafka({
-        brokers: ['broker:19092']
-    });
+export default class FraudDetector {
 
-    private readonly consumer: Consumer = this.kafka.consumer({
-        groupId: 'FraudDetector',
-        // partitionAssigners: <Array>,
-        // sessionTimeout: <Number>,
-        // rebalanceTimeout: <Number>,
-        // heartbeatInterval: <Number>,
-        // metadataMaxAge: <Number>,
-        // allowAutoTopicCreation: <Boolean>,
-        // maxBytesPerPartition: <Number>,
-        // minBytes: <Number>,
-        // maxBytes: <Number>,
-        // maxWaitTimeInMs: <Number>,
-        // retry: <Object>,
-        // maxInFlightRequests: <Number>,
-        // rackId: <String>
-    });
+    private avgMessageSize = 280;
+    private numberMessageReceive = 1;
+    private maxBytesPerPartition = this.numberMessageReceive * this.avgMessageSize;
+    private maxBytes = 32 * this.maxBytesPerPartition;
 
-    async poll() {
-        try {
-            await this.consumer.connect();
-            await this.consumer.subscribe({ topics: ['ECOMMERCE_NEW_ORDER'], fromBeginning: true});
-            await this.consumer.run({
+    private readonly consumer: KafkaConsumer;
+
+    constructor()
+    {
+        this.consumer = new KafkaConsumer(
+            {
+                brokers: ['broker:19092'],
+                clientId: 'FraudDetector'
+            },
+            {
+                groupId: 'FraudDetector',
+                maxBytesPerPartition: this.maxBytesPerPartition,
+                maxBytes: this.maxBytes
+            }
+        )
+    }
+
+    private async poll(): Promise<void>
+    {
+        this.consumer.poll(
+            { topics: ['ECOMMERCE_NEW_ORDER'], fromBeginning: true},
+            {
                 autoCommitInterval: 5000,
                 eachMessage: async ({ topic, partition, message }) => {
                     console.log({
@@ -37,14 +39,7 @@ class FraudDetector {
                         headers: message.headers,
                     })
                 },
-            })
-        } catch (error) {
-            if (error instanceof Error) {
-                console.log('ERROR' + error.message)
             }
-        }
+        )
     }
 }
-
-const order = new FraudDetector();
-order.poll();

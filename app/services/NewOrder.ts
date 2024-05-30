@@ -1,40 +1,44 @@
-import { Kafka, Message, Producer, ProducerRecord, RecordMetadata } from "kafkajs";
+import KafkaProduce from "./kafka/KafkaProduce";
 
-class NewOrder {
-    private readonly kafka: Kafka = new Kafka({
-        brokers: ['broker:19092']
-    });
+export default class NewOrder {
 
-    private readonly producer: Producer = this.kafka.producer();
+    private readonly kafka: KafkaProduce;
 
-    async produce(topic: string, messages: Message[]) {
-        const record: ProducerRecord = {
-            topic,
-            messages: messages
-        };
-        
-        try {
-            await this.producer.connect();
-            const producer: RecordMetadata[] = await this.producer.send(record);
-            await this.producer.disconnect();
-            producer.map((prod) => console.log(
-                'SUCESS ' + prod.topicName + ':::partition ' + prod.partition + '/ offset' + prod.baseOffset + '/ timestamp' + prod.logStartOffset
-            ))
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                console.log('ERROR' + error.message)
+    constructor()
+    {
+        this.kafka = new KafkaProduce(
+            {
+                brokers: ['broker:19092']
             }
-        }
+        );
+    }
+
+    async post(): Promise<void>
+    {
+        this.kafka.produce(
+            {
+                topic: 'ECOMMERCE_NEW_ORDER',
+                messages: [{
+                    key: Date.now()+ '', 
+                    value: 'Hello KafkaJS user!'
+                }]
+            },
+            (prod) => console.log(
+                'SUCESS ' + prod.topicName + ':::partition ' + prod.partition + '/ offset' + prod.baseOffset + '/ timestamp' + prod.logStartOffset
+            )
+        );
+        
+        this.kafka.produce(
+            {
+                topic: 'ECOMMERCE_SEND_EMAIL',
+                messages: [{
+                    key: Date.now()+ '',
+                    value: 'Thank you for your order!'
+                }]
+            },
+            (prod) => console.log(
+                'SUCESS ' + prod.topicName + ':::partition ' + prod.partition + '/ offset' + prod.baseOffset + '/ timestamp' + prod.logStartOffset
+            )
+        );
     }
 }
-
-const order = new NewOrder();
-order.produce(
-    'ECOMMERCE_NEW_ORDER',
-    [{ value: 'Hello KafkaJS user!' }]
-);
-
-order.produce(
-    'ECOMMERCE_SEND_EMAIL',
-    [{ value: 'Thank you for your order!' }]
-);
