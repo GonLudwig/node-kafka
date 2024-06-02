@@ -13,14 +13,14 @@ export default class NewOrder {
         );
     }
 
-    async post(): Promise<void>
+    public async post(): Promise<void>
     {
         this.kafka.produce(
             {
                 topic: 'ECOMMERCE_NEW_ORDER',
                 messages: [{
                     key: Date.now()+ '', 
-                    value: 'Hello KafkaJS user!'
+                    value: JSON.stringify({name: 'John', price: 2.23})
                 }]
             },
             (prod) => console.log(

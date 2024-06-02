@@ -15,7 +15,7 @@ export default class LogService {
         )
     };
     
-    private async poll(): Promise<void>
+    public async poll(): Promise<void>
     {
         this.consumer.poll(
             { topics: [/^ECOMMERCE[A-Z0-9_]*$/], fromBeginning: true},

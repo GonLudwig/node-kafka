@@ -24,7 +24,7 @@ export default class FraudDetector {
         )
     }
 
-    private async poll(): Promise<void>
+    public async poll(): Promise<void>
     {
         this.consumer.poll(
             { topics: ['ECOMMERCE_NEW_ORDER'], fromBeginning: true},
@@ -35,8 +35,8 @@ export default class FraudDetector {
                         topic,
                         partition,
                         key: message.key?.toString(),
-                        value: message.value?.toString(),
-                        headers: message.headers,
+                        value: message.value != null ? JSON.parse(message.value?.toString()) : 'null',
+                        headers: message.headers
                     })
                 },
             }

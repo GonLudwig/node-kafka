@@ -16,7 +16,7 @@ export default class EmailService {
         )
     }
 
-    private async poll(): Promise<void>
+    public async poll(): Promise<void>
     {
         this.consumer.poll(
             { topics: ['ECOMMERCE_SEND_EMAIL'], fromBeginning: true},
